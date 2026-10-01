@@ -3,136 +3,213 @@ from tkinter import filedialog, messagebox, simpledialog, ttk
 from PIL import Image, ImageTk
 import pymupdf as fitz
 import os
+import ctypes
 
 class PDFAraciApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("YoRHa PDF Birleştirici ve Ayırıcı")
-        self.root.geometry("900x650")
+        self.root.title("YoRHa Sistem Veri Yöneticisi")
         
-        # --- NieR Renk Paleti ---
-        self.bg_color = "#1c1c1c"       # Koyu arka plan
-        self.fg_color = "#d1cdb7"       # NieR soluk bej yazı rengi
-        self.btn_bg = "#2a2a2a"         # Buton arka planı
-        self.btn_active_bg = "#d1cdb7"  # Butona tıklanınca (Bej)
-        self.btn_active_fg = "#111111"  # Butona tıklanınca yazı rengi (Siyah)
+        # --- DPI ÖLÇEKLEME FAKTÖRÜ HESAPLAMA ---
+        try:
+            self.sf = self.root.winfo_fpixels('1i') / 96.0
+        except:
+            self.sf = 1.0
+            
+        # --- BOYUT GÜNCELLEMESİ (Her şeyin tam görünmesi için büyütüldü) ---
+        pencere_g = int(950 * self.sf)
+        pencere_y = int(780 * self.sf) # 650'den 780'e çıkarıldı ki dantel sığsın
+        self.root.geometry(f"{pencere_g}x{pencere_y}")
+        
+        # --- NieR Orijinal UI Renk Paleti ---
+        self.bg_color = "#d3cebb"       
+        self.fg_color = "#3d3a31"       
+        self.btn_bg = "#b3ae9d"         
+        self.btn_active_bg = "#3d3a31"  
+        self.btn_active_fg = "#d3cebb"  
         
         self.root.configure(bg=self.bg_color)
         
         self.pdf_listesi = []
-        
         self.secili_pdf_yolu = None
         self.secili_indeksler = []
         self.gecerli_onizleme_sirasi = 0
+        self.varsayilan_img_tk = None
         
+        self.pencere_baslik_ayarla() 
+        self.varsayilan_gorsel_yukle()
         self.tema_ayarla()
         self.arayuz_olustur()
-        self.dantel_ekle() # 2B Dantel motifini ekleyen fonksiyon
+        self.dantel_ekle()
+
+    def varsayilan_gorsel_yukle(self):
+        try:
+            gorsel_yolu = os.path.join(os.path.dirname(__file__), "no_data.jpg")
+            if os.path.exists(gorsel_yolu):
+                img = Image.open(gorsel_yolu)
+                img.thumbnail((int(380 * self.sf), int(480 * self.sf)), Image.Resampling.LANCZOS)
+                self.varsayilan_img_tk = ImageTk.PhotoImage(img)
+        except Exception as e:
+            pass
+
+    def pencere_baslik_ayarla(self):
+        try:
+            logo_yolu = os.path.join(os.path.dirname(__file__), "yorha.png")
+            if os.path.exists(logo_yolu):
+                icon_img = ImageTk.PhotoImage(Image.open(logo_yolu))
+                self.root.iconphoto(False, icon_img)
+        except:
+            pass
+
+        try:
+            # --- ZORLANMA ÇÖZÜMÜ BURADA ---
+            # update() yerine update_idletasks() kullandık. Donmayı engeller.
+            self.root.update_idletasks() 
+            hex_color = self.bg_color
+            r = int(hex_color[1:3], 16)
+            g = int(hex_color[3:5], 16)
+            b = int(hex_color[5:7], 16)
+            color = ctypes.c_int(r | (g << 8) | (b << 16))
+            hwnd = ctypes.windll.user32.GetParent(self.root.winfo_id())
+            DWMWA_CAPTION_COLOR = 35 
+            ctypes.windll.dwmapi.DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, ctypes.byref(color), ctypes.sizeof(color))
+        except:
+            pass
 
     def tema_ayarla(self):
-        """Treeview (Liste) ve genel ttk bileşenleri için karanlık tema ayarları"""
         style = ttk.Style()
         style.theme_use("clam")
         
         style.configure("Treeview", 
                         background=self.btn_bg, 
                         foreground=self.fg_color, 
-                        fieldbackground=self.btn_bg, 
+                        fieldbackground=self.bg_color, 
                         bordercolor=self.bg_color,
-                        font=("Segoe UI", 9))
+                        font=("Helvetica", 10),
+                        rowheight=int(25 * self.sf))
         
         style.configure("Treeview.Heading", 
-                        background="#111111", 
+                        background=self.bg_color, 
                         foreground=self.fg_color, 
                         relief="flat",
-                        font=("Segoe UI", 9, "bold"))
+                        font=("Helvetica", 10, "bold"))
         
-        style.map("Treeview", background=[('selected', '#4a473e')]) # Seçili öğe rengi
+        style.map("Treeview", 
+                  background=[('selected', self.fg_color)],
+                  foreground=[('selected', self.bg_color)])
 
     def arayuz_olustur(self):
-        # Ana çerçeve
-        ana_panel = tk.PanedWindow(self.root, orient=tk.HORIZONTAL, bg=self.bg_color, bd=0, sashwidth=2)
-        ana_panel.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
+        ana_panel = tk.PanedWindow(self.root, orient=tk.HORIZONTAL, bg=self.bg_color, bd=0, sashwidth=int(2 * self.sf))
+        ana_panel.pack(fill=tk.BOTH, expand=True, padx=int(15 * self.sf), pady=int(15 * self.sf))
 
         ### SOL PANEL ###
         sol_frame = tk.Frame(ana_panel, bg=self.bg_color)
-        ana_panel.add(sol_frame, minsize=420)
+        ana_panel.add(sol_frame, minsize=int(420 * self.sf))
 
-        # Butonlar
+        baslik = tk.Label(sol_frame, text="SYSTEM DATA", font=("Helvetica", 18), bg=self.bg_color, fg=self.fg_color, anchor="w")
+        baslik.pack(fill=tk.X, pady=(0, int(10 * self.sf)))
+
         buton_frame = tk.Frame(sol_frame, bg=self.bg_color)
-        buton_frame.pack(fill=tk.X, pady=(0, 10))
+        buton_frame.pack(fill=tk.X, pady=(0, int(10 * self.sf)))
 
-        self.ozel_buton(buton_frame, "PDF Ekle", self.pdf_ekle).pack(side=tk.LEFT, padx=(0, 5))
+        self.ozel_buton(buton_frame, "PDF Ekle", self.pdf_ekle).pack(side=tk.LEFT, padx=(0, int(5 * self.sf)))
         self.ozel_buton(buton_frame, "Listeden Çıkar", self.pdf_cikar).pack(side=tk.LEFT)
 
-        # Liste
         sutunlar = ("dosya_adi", "sayfa_araligi")
         self.tree = ttk.Treeview(sol_frame, columns=sutunlar, show="headings", selectmode="browse")
         self.tree.heading("dosya_adi", text="Birim Adı (Dosya)")
         self.tree.heading("sayfa_araligi", text="Hedef Veri (Sayfalar)")
-        self.tree.column("dosya_adi", width=250)
-        self.tree.column("sayfa_araligi", width=150)
+        
+        self.tree.column("dosya_adi", width=int(250 * self.sf))
+        self.tree.column("sayfa_araligi", width=int(150 * self.sf))
         self.tree.pack(fill=tk.BOTH, expand=True)
         self.tree.bind("<<TreeviewSelect>>", self.on_pdf_secildi)
 
-        # İşlem Paneli
-        islem_frame = tk.LabelFrame(sol_frame, text=" İşlem Komutları ", bg=self.bg_color, fg=self.fg_color, font=("Segoe UI", 10), bd=1)
-        islem_frame.pack(fill=tk.X, pady=10)
+        islem_frame = tk.LabelFrame(sol_frame, text=" İşlem Komutları ", bg=self.bg_color, fg=self.fg_color, font=("Helvetica", 10), bd=1)
+        islem_frame.pack(fill=tk.X, pady=int(10 * self.sf))
 
-        self.ozel_buton(islem_frame, "Tüm Listeyi Birleştir", self.pdf_birlestir).pack(fill=tk.X, pady=3, padx=5)
-        self.ozel_buton(islem_frame, "Seçili PDF'i Ayrı Kaydet", self.pdf_ayri_kaydet).pack(fill=tk.X, pady=3, padx=5)
-        self.ozel_buton(islem_frame, "Seçili PDF'i Tek Tek Böl", self.pdf_tek_tek_bol).pack(fill=tk.X, pady=3, padx=5)
+        self.ozel_buton(islem_frame, "Tüm Listeyi Birleştir", self.pdf_birlestir).pack(fill=tk.X, pady=int(3 * self.sf), padx=int(5 * self.sf))
+        self.ozel_buton(islem_frame, "Seçili PDF'i Ayrı Kaydet", self.pdf_ayri_kaydet).pack(fill=tk.X, pady=int(3 * self.sf), padx=int(5 * self.sf))
+        self.ozel_buton(islem_frame, "Seçili PDF'i Tek Tek Böl", self.pdf_tek_tek_bol).pack(fill=tk.X, pady=int(3 * self.sf), padx=int(5 * self.sf))
 
-        ### SAĞ PANEL (Önizleme) ###
+        ### SAĞ PANEL ###
         sag_frame = tk.Frame(ana_panel, bg=self.bg_color, bd=1, relief=tk.SOLID)
-        ana_panel.add(sag_frame, minsize=400)
+        ana_panel.add(sag_frame, minsize=int(400 * self.sf))
 
-        tk.Label(sag_frame, text="Görsel Veri (Önizleme)", bg=self.bg_color, fg=self.fg_color, font=("Segoe UI", 10, "bold")).pack(pady=5)
+        tk.Label(sag_frame, text="Görsel Veri (Önizleme)", bg=self.bg_color, fg=self.fg_color, font=("Helvetica", 10, "bold")).pack(pady=int(5 * self.sf))
 
-        self.onizleme_label = tk.Label(sag_frame, text="Hedef seçilmedi.", bg="#111111", fg=self.fg_color)
-        self.onizleme_label.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        self.onizleme_label = tk.Label(sag_frame, bg=self.btn_bg, fg=self.fg_color)
+        self.onizleme_label.pack(fill=tk.BOTH, expand=True, padx=int(10 * self.sf), pady=int(5 * self.sf))
 
         nav_frame = tk.Frame(sag_frame, bg=self.bg_color)
-        nav_frame.pack(pady=10)
+        nav_frame.pack(pady=int(10 * self.sf))
 
-        self.btn_onceki = self.ozel_buton(nav_frame, "< Geri", lambda: self.sayfa_degistir(-1))
-        self.btn_onceki.pack(side=tk.LEFT, padx=5)
-        self.btn_onceki.config(state=tk.DISABLED)
+        self.btn_onceki = self.ozel_buton(nav_frame, "I<", lambda: self.sayfa_degistir(-1))
+        self.btn_onceki.pack(side=tk.LEFT, padx=int(5 * self.sf))
+        
+        self.lbl_sayfa_bilgi = tk.Label(nav_frame, bg=self.bg_color, fg=self.fg_color, font=("Helvetica", 10))
+        self.lbl_sayfa_bilgi.pack(side=tk.LEFT, padx=int(10 * self.sf))
 
-        self.lbl_sayfa_bilgi = tk.Label(nav_frame, text="- / -", bg=self.bg_color, fg=self.fg_color)
-        self.lbl_sayfa_bilgi.pack(side=tk.LEFT, padx=10)
+        self.btn_sonraki = self.ozel_buton(nav_frame, ">I", lambda: self.sayfa_degistir(1))
+        self.btn_sonraki.pack(side=tk.LEFT, padx=int(5 * self.sf))
 
-        self.btn_sonraki = self.ozel_buton(nav_frame, "İleri >", lambda: self.sayfa_degistir(1))
-        self.btn_sonraki.pack(side=tk.LEFT, padx=5)
-        self.btn_sonraki.config(state=tk.DISABLED)
+        mesaj_kutusu = tk.Frame(sag_frame, bg=self.btn_bg, bd=2, relief=tk.FLAT)
+        mesaj_kutusu.pack(fill=tk.X, padx=int(10 * self.sf), pady=(0, int(10 * self.sf)))
+        
+        sol_cizgi = tk.Frame(mesaj_kutusu, bg=self.fg_color, width=int(5 * self.sf))
+        sol_cizgi.pack(side=tk.LEFT, fill=tk.Y)
+        
+        self.lbl_alt_mesaj = tk.Label(mesaj_kutusu, text="Sistem verilerini seçin ve işlemleri uygulayın.", bg=self.btn_bg, fg=self.fg_color, font=("Helvetica", 10), anchor="w")
+        self.lbl_alt_mesaj.pack(side=tk.LEFT, fill=tk.X, padx=int(5 * self.sf), pady=int(5 * self.sf))
+
+        self.onizleme_sifirla()
 
     def ozel_buton(self, parent, metin, komut):
-        """NieR temasına uygun buton üreten yardımcı fonksiyon"""
         btn = tk.Button(parent, text=metin, command=komut, 
                         bg=self.btn_bg, fg=self.fg_color, 
                         activebackground=self.btn_active_bg, activeforeground=self.btn_active_fg,
-                        font=("Segoe UI", 9), relief=tk.FLAT, bd=1, cursor="hand2")
+                        font=("Helvetica", 9), relief=tk.FLAT, bd=0, 
+                        padx=int(10 * self.sf), pady=int(2 * self.sf), cursor="hand2")
         return btn
 
     def dantel_ekle(self):
-        """2B'nin dantel motifini pencerenin altına yerleştirir."""
         try:
-            # UYARI: Bu kodun çalışması için script ile aynı klasörde "2b_dantel.png" adında 
-            # transparan bir dantel görseli olmalıdır. Yoksa sessizce hata verir ve desensiz çalışır.
-            dantel_yolu = os.path.join(os.path.dirname(__file__), "2b_dantel.png")
+            dantel_yolu = os.path.join(os.path.dirname(__file__), "2b_dantel_seffaf_siyah.png")
             if os.path.exists(dantel_yolu):
-                self.dantel_img = Image.open(dantel_yolu)
-                # Genişliği pencereye uydur, yüksekliği 40 piksel yap
-                self.dantel_img = self.dantel_img.resize((900, 40), Image.Resampling.LANCZOS)
-                self.dantel_tk = ImageTk.PhotoImage(self.dantel_img)
+                orijinal_img = Image.open(dantel_yolu).convert("RGBA")
                 
-                # Süsleme etiketini pencerenin en altına yerleştir
-                self.dantel_label = tk.Label(self.root, image=self.dantel_tk, bg=self.bg_color, bd=0)
+                # Hedef yükseklik 100 yapıldı.
+                hedef_yukseklik = int(75 * self.sf) 
+                oran = hedef_yukseklik / orijinal_img.height
+                hedef_genislik = int(orijinal_img.width * oran)
+                kucuk_img = orijinal_img.resize((hedef_genislik, hedef_yukseklik), Image.Resampling.LANCZOS)
+                
+                max_genislik = 3000 
+                tekrar_sayisi = (max_genislik // hedef_genislik) + 1
+                
+                tiled_img = Image.new("RGBA", (tekrar_sayisi * hedef_genislik, hedef_yukseklik), (0, 0, 0, 0))
+                
+                for i in range(tekrar_sayisi):
+                    tiled_img.paste(kucuk_img, (i * hedef_genislik, 0))
+                
+                self.dantel_tk = ImageTk.PhotoImage(tiled_img)
+                # anchor="n" sayesinde resim kırpılmadan üstten hizalanacak
+                self.dantel_label = tk.Label(self.root, image=self.dantel_tk, bg=self.bg_color, bd=0, anchor="n")
                 self.dantel_label.pack(side=tk.BOTTOM, fill=tk.X)
         except Exception as e:
-            print("Dantel yüklenemedi:", e)
+            pass
 
-    # --- ESKİ MANTIK VE İŞLEM FONKSİYONLARI (Renk kodları uyarlanarak korundu) ---
+    def onizleme_sifirla(self):
+        if self.varsayilan_img_tk:
+            self.onizleme_label.config(image=self.varsayilan_img_tk, text="", bg=self.bg_color)
+        else:
+            self.onizleme_label.config(image='', text="Hedef seçilmedi.", bg=self.btn_bg)
+            
+        self.lbl_sayfa_bilgi.config(text="NO DATA")
+        self.btn_onceki.config(state=tk.DISABLED)
+        self.btn_sonraki.config(state=tk.DISABLED)
+
+    # --- İŞLEM FONKSİYONLARI ---
     def aralik_cozumle(self, aralik_str, max_sayfa):
         if not aralik_str.strip():
             return list(range(max_sayfa))
@@ -154,17 +231,15 @@ class PDFAraciApp:
     def pdf_ekle(self):
         dosya_yolu = filedialog.askopenfilename(filetypes=[("PDF Dosyaları", "*.pdf")])
         if not dosya_yolu: return
-
         try:
             pdf_doc = fitz.open(dosya_yolu)
             max_sayfa = pdf_doc.page_count
             pdf_doc.close()
-        except Exception:
+        except:
             messagebox.showerror("Sistem Hatası", "Veri dosyası okunamadı.")
             return
 
-        aralik = simpledialog.askstring("Veri Aralığı", 
-                                        f"Bu veri {max_sayfa} sayfa.\nAlınacak hedefleri girin (Örn: 1-5, 8):\nTümü için boş bırakın:")
+        aralik = simpledialog.askstring("Veri Aralığı", f"Bu veri {max_sayfa} sayfa.\nAlınacak hedefleri girin (Örn: 1-5, 8):\nTümü için boş bırakın:")
         if aralik is None: return
             
         dosya_adi = os.path.basename(dosya_yolu)
@@ -180,15 +255,14 @@ class PDFAraciApp:
         item_id = secili[0]
         self.tree.delete(item_id)
         self.pdf_listesi = [p for p in self.pdf_listesi if p["id"] != item_id]
-        
-        self.onizleme_label.config(image='', text="Hedef seçilmedi.", bg="#111111")
-        self.lbl_sayfa_bilgi.config(text="- / -")
-        self.btn_onceki.config(state=tk.DISABLED)
-        self.btn_sonraki.config(state=tk.DISABLED)
+        self.onizleme_sifirla()
 
     def on_pdf_secildi(self, event):
         secili = self.tree.selection()
-        if not secili: return
+        if not secili: 
+            self.onizleme_sifirla()
+            return
+            
         item_id = secili[0]
         secili_veri = next((p for p in self.pdf_listesi if p["id"] == item_id), None)
         
@@ -217,7 +291,7 @@ class PDFAraciApp:
             doc.close()
 
             img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
-            img.thumbnail((380, 480), Image.Resampling.LANCZOS)
+            img.thumbnail((int(380 * self.sf), int(480 * self.sf)), Image.Resampling.LANCZOS)
             tk_img = ImageTk.PhotoImage(img)
 
             self.onizleme_label.config(image=tk_img, text="", bg=self.bg_color)
@@ -228,7 +302,7 @@ class PDFAraciApp:
             self.btn_onceki.config(state=tk.NORMAL if self.gecerli_onizleme_sirasi > 0 else tk.DISABLED)
             self.btn_sonraki.config(state=tk.NORMAL if self.gecerli_onizleme_sirasi < toplam_secili - 1 else tk.DISABLED)
         except Exception as e:
-            print("Önizleme hatası:", e)
+            pass
 
     def pdf_birlestir(self):
         if not self.pdf_listesi: return
@@ -284,6 +358,3 @@ class PDFAraciApp:
             messagebox.showerror("Kritik Hata", f"İşlem başarısız:\n{str(e)}")
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = PDFAraciApp(root)
-    root.mainloop()
