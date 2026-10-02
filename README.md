@@ -6,7 +6,7 @@ Bu proje, NieR: Automata evreninin ikonik **YoRHa OS** arayüzünden ilham alın
 ## 🎥 Sistem Önizlemesi
 *(Aşağıdaki videoyu oynatarak arayüzü ve işlemleri inceleyebilirsiniz)*
 
-<video src="[(https://github.com/Velosiii/Python_Tools/raw/main/Pdf/Yorha_Pdf.mp4)](https://github.com/Velosiii/Python_Tools/raw/refs/heads/main/Pdf/Yorha_Pdf.mp4)" controls="controls" muted="muted" width="100%"></video>
+<video src="(https://github.com/Velosiii/Python_Tools/raw/refs/heads/main/Pdf/Yorha_Pdf.mp4)" controls="controls" muted="muted" width="100%"></video>
 
 > **Not:** `demo.mp4` dosyasını kendi videonun adıyla değiştirip GitHub'a yüklediğinde video burada otomatik olarak oynatılacaktır.
 
