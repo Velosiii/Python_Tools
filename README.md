@@ -7,10 +7,10 @@ Bu proje, NieR: Automata evreninin ikonik **YoRHa OS** arayüzünden ilham alın
 *(Aşağıdaki videoyu oynatarak arayüzü ve işlemleri inceleyebilirsiniz)*
 
 <p align="center">
-  <img src="Pdf/Yorha_Pdf.gif" alt="YoRHa OS Önizleme" width="100%">
+  <img src="Pdf/Yorha_Pdf.gif" alt="YoRHa OS Önizleme" width="80%">
 </p>
 
-> **Not:** `demo.mp4` dosyasını kendi videonun adıyla değiştirip GitHub'a yüklediğinde video burada otomatik olarak oynatılacaktır.
+> **Not:** Giften kaynaklı çözünürlük berbat ve hayır gif donmadı bi kaç saniye boşluk var. Optimizasyon baby... 
 
 ---
 
