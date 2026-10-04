@@ -1,3 +1,9 @@
+# - -- Python Tools -- -
+## Python ile geliştirdiğim çeşitli araçlar
+*Kendimce günlük işleri kolaştıran araçlar genel bug fix ve optimizasyonları yapıldı(Sanırım)*
+*   **Pdf ekle çıkar (YoRHa temalı versiyon)**
+*   **Instagram profil yedekleyicisi**
+
 # YoRHa System Data Manager (PDF Aracı) ⚔️
 *For the Glory of Mankind.*
 
@@ -39,12 +45,4 @@ Projenin altyapısında hızlı render almak ve modern bir masaüstü deneyimi s
 *   **[ctypes]** - Yüksek DPI keskinliğini zorlamak ve Windows başlık çubuğu (DWM) rengini değiştirmek için işletim sistemi API bağlantıları.
 
 ---
-
-## 🚀 Kurulum ve Çalıştırma
-
-Projeyi kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları izleyebilirsiniz.
-
-**1. Gerekli kütüphaneleri kurun:**
-```bash
-pip install pymupdf pillow tkinterdnd2
 
