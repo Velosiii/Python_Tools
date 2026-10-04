@@ -11,6 +11,15 @@
 
 Bu proje, NieR: Automata evreninin ikonik **YoRHa OS** arayüzünden ilham alınarak geliştirilmiş, güçlü ve şık bir masaüstü PDF yönetim aracıdır. Geleneksel sıkıcı araçların aksine; yüksek çözünürlüklü önizleme, sürükle-bırak desteği ve asenkron animasyonlu "Tech" yükleme ekranı ile kullanıcılara benzersiz bir deneyim sunar.
 
+## 🎥 Sistem Önizlemesi
+*(Aşağıdaki videoyu oynatarak arayüzü ve işlemleri inceleyebilirsiniz)*
+
+<p align="center">
+  <img src="Pdf/Yorha_Pdf.gif" alt="YoRHa OS Önizleme" width="80%">
+</p>
+
+> **Not:** Giften kaynaklı çözünürlük berbat ve hayır gif donmadı bi kaç saniye boşluk var. Optimizasyon baby... 
+
 ---
 
 # Instagram Çevrimdışı Klonlayıcı & Yedekleyici 📸
