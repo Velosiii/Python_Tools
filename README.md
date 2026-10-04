@@ -1,13 +1,30 @@
 # - -- Python Tools -- -
 ## Python ile geliştirdiğim çeşitli araçlar
-*Kendimce günlük işleri kolaştıran araçlar genel bug fix ve optimizasyonları yapıldı(Sanırım)*
+*Kendimce günlük işleri kolaylaştıran araçlar, genel bug fix ve optimizasyonları yapıldı (Sanırım)*
 *   **Pdf ekle çıkar (YoRHa temalı versiyon)**
 *   **Instagram profil yedekleyicisi**
+
+---
 
 # YoRHa System Data Manager (PDF Aracı) ⚔️
 *For the Glory of Mankind.*
 
 Bu proje, NieR: Automata evreninin ikonik **YoRHa OS** arayüzünden ilham alınarak geliştirilmiş, güçlü ve şık bir masaüstü PDF yönetim aracıdır. Geleneksel sıkıcı araçların aksine; yüksek çözünürlüklü önizleme, sürükle-bırak desteği ve asenkron animasyonlu "Tech" yükleme ekranı ile kullanıcılara benzersiz bir deneyim sunar.
+
+---
+
+# Instagram Çevrimdışı Klonlayıcı & Yedekleyici 📸
+*API limitlerine son. Tamamen yerel, tamamen senin.*
+
+Instagram API'sinin kısıtlamalarına (429 Limit Hataları) takılmadan, doğrudan kendi Firefox oturumunuz üzerinden çalışan "hayalet" bir yedekleme aracıdır. Sadece fotoğrafları indirmekle kalmaz, hedef profilin **internetsiz çalışan, etkileşimli bir HTML kopyasını** oluşturur!
+
+### 🌟 Öne Çıkan Özellikler:
+*   **🚀 Limitsiz & Şifresiz (Anti-Ban):** Resmi API veya arka kapılar kullanmaz. Selenium ile doğrudan sizin Firefox profilinizi (çerezlerinizi) kullanarak sayfayı bir insan gibi gezer. Şifre girmenize gerek yoktur ve ban riski sıfırdır.
+*   **🧠 Akıllı "Ctrl+A" Veri Çekici:** Instagram'ın sürekli değişen karmaşık HTML yapısını atlatmak için sayfanın düz metnini okur. Biyografi, gönderi, takipçi ve takip sayılarını sıfır hatayla ayıklar.
+*   **🎞️ Tam Kapsamlı Medya Desteği:** Tekli fotoğraflar, videolar (MP4), kaydırmalı (Carousel) gönderiler ve yüksek çözünürlüklü Profil Fotoğrafını (PP) eksiksiz indirir.
+*   **✨ Özel Kapaklı Öne Çıkanlar (Highlights):** Profildeki öne çıkan hikayeleri sadece içindeki videolarla değil, özel kapak fotoğrafları ve isimleriyle birlikte gruplayarak arşivler.
+*   **🌐 İnteraktif Yerel Galeri (Dark Mode):** İndirilen tüm verilerle şık, karanlık temalı bir `index.html` inşa eder. Tıklanabilir postlar, tam ekran medya görüntüleyici (Modal/Lightbox) ve klavye ok tuşlarıyla kaydırma desteği ile **gerçek Instagram deneyimini çevrimdışı sunar.**
+*   **📦 Otomatik Paketleme:** İşlem bittiğinde hiçbir ortalığı dağıtmaz; tüm arşivi `Instagram_Yedekleri` klasörü altında düzenli bir `.zip` dosyası haline getirir.
 
 ## 🎥 Sistem Önizlemesi
 *(Aşağıdaki videoyu oynatarak arayüzü ve işlemleri inceleyebilirsiniz)*
